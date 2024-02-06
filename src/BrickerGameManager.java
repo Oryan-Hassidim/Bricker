@@ -28,49 +28,77 @@ import java.awt.event.KeyEvent;
 public class BrickerGameManager extends GameManager {
 
     // #region Constants
+    /** The default size of the window. */
     private static final Vector2 DEFAULT_WINDOW_SIZE = new Vector2(700, 500);
 
+    /** The width of the walls. */
     public static final int WALL_WIDTH = 50;
+    /** The default number of bricks per row. */
     private static final int DEFAULT_BRICKS_PER_ROW = 8;
+    /** The default number of bricks per column. */
     private static final int DEFAULT_BRICKS_PER_COLUMN = 7;
+    /** The margin of the bricks area from the window edges. */
     private static final int BRICKS_AREA_MARGIN = 10;
+    /** The gap between bricks. */
     private static final int BRICKS_GAP = 5;
     // TODO: I need to make all bricks 15 px height?
-    private static final float BRICKS_AREA_HEIGHT_RATIO = 0.4f;
+    /** The max ratio of the height of the bricks area to the window height. */
+    private static final float MAX_BRICKS_AREA_HEIGHT_RATIO = 0.4f;
+    /** The message to display when the player loses. */
     private static final String LOSE_MESSAGE = "You lose! Play again?";
+    /** The message to display when the player wins. */
     private static final String WIN_MESSAGE = "You win! Play again?";
+    /** The maximum number of lives. */
     protected static final int MAX_LIVES = 4;
-    private static final int DEFAULT_BALLS_NUMBER = 3;
+    /** The default number of balls. */
+    private static final int DEFAULT_BALLS_NUMBER = 1;
 
     // paths
+    /** The path to the background image. */
     private static final String BACKGROUND_IMAGE_PATH = "assets/DARK_BG2_small.jpeg";
-
     // #endregion
 
     // #region fields
+    /** The number of bricks remaining. */
     private int bricks;
+    /** The number of lives remaining. */
     private int lives;
+    /** The number of balls remaining. */
     protected int balls;
 
+    /** Whether the game is poused. */
     protected boolean poused;
+    /** The time of the last pouse/unpouse. */
     private Date lastPoused = new Date();
 
+    /** The image reader. */
     private ImageReader imageReader;
+    /** The input listener. */
     private UserInputListener inputListener;
+    /** The window controller. */
     private WindowController windowController;
+    /** The dimensions of the window. */
     private Vector2 dims;
 
+    /** The lives display. we need it to update the lives. */
     private Lives livesDisplay;
     // #endregion
 
     // #region commands
 
+    /** The command to add a game object to the game. */
     private AddGameObjectCommand addGameObjectCommand = new AddGameObjectCommand() {
         @Override
         public void add(GameObject gameObject, int layer) {
             gameObjects().addGameObject(gameObject, layer);
         }
     };
+    /**
+     * The command to remove a game object from the game.
+     * if the game object is a brick, it also updates the number of bricks
+     * remaining.
+     * if there are no bricks remaining, it calls winGame.
+     */
     private RemoveGameObjectCommand removeGameObjectCommand = new RemoveGameObjectCommand() {
         @Override
         public void remove(GameObject gameObject, int layer) {
@@ -89,12 +117,17 @@ public class BrickerGameManager extends GameManager {
                 winGame();
         }
     };
+    /** The command to set the camera of the game. */
     private SetCameraCommand setCameraCommand = new SetCameraCommand() {
         @Override
         public void setCamera(Camera camera) {
             mySetCamera(camera);
         }
     };
+    /**
+     * The command to add a life to the player.
+     * if the number of lives is already at the maximum, it does nothing.
+     */
     private AddLifeCommand addLifeCommand = new AddLifeCommand() {
         @Override
         public void addLife() {
@@ -108,13 +141,7 @@ public class BrickerGameManager extends GameManager {
     // #region constructors
 
     /**
-     * creates a new bricker game manager with a given title, window size,
-     * and number of bricks per row and column
-     * 
-     * @param title           the title of the game
-     * @param windowSize      the size of the window
-     * @param bricksPerRow    the number of bricks per row
-     * @param bricksPerColumn the number of bricks per column
+     * Constructs a new BrickerGameManager.
      */
     public BrickerGameManager() {
         super("Bricker", DEFAULT_WINDOW_SIZE);
@@ -124,10 +151,19 @@ public class BrickerGameManager extends GameManager {
 
     // #region methods
 
+    /**
+     * Sets the camera of the game.
+     * we need this method to set the camera from the setCameraCommand.
+     * 
+     * @param camera the camera to set
+     */
     private void mySetCamera(Camera camera) {
         setCamera(camera);
     }
 
+    /**
+     * A method to call when the player wins the game.
+     */
     protected void winGame() {
         if (!windowController.openYesNoDialog(WIN_MESSAGE)) {
             windowController.closeWindow();
@@ -135,6 +171,9 @@ public class BrickerGameManager extends GameManager {
         windowController.resetGame();
     }
 
+    /**
+     * A method to call when the player loses the game.
+     */
     protected void loseGame() {
         if (!windowController.openYesNoDialog(LOSE_MESSAGE)) {
             windowController.closeWindow();
@@ -143,7 +182,7 @@ public class BrickerGameManager extends GameManager {
     }
 
     /**
-     * adds game objects to the game
+     * Adds game objects to the game.
      * 
      * @param objects the game objects to add
      */
@@ -153,6 +192,9 @@ public class BrickerGameManager extends GameManager {
         }
     }
 
+    /**
+     * Configures the services of the game.
+     */
     protected void configureServices(
             ImageReader imageReader, SoundReader soundReader,
             UserInputListener inputListener, WindowController windowController) {
@@ -179,6 +221,9 @@ public class BrickerGameManager extends GameManager {
         Services.registerService(Random.class, new Random());
     }
 
+    /**
+     * Initializes the background of the game.
+     */
     protected void initializeBackground() {
         var background = new GameObject(
                 Vector2.ZERO, dims,
@@ -187,6 +232,9 @@ public class BrickerGameManager extends GameManager {
         this.gameObjects().addGameObject(background, Layer.BACKGROUND);
     }
 
+    /**
+     * Initializes the walls of the game.
+     */
     protected void initializeWalls() {
         Renderable wallImage = null;
         var walls = new GameObject[] {
@@ -207,7 +255,10 @@ public class BrickerGameManager extends GameManager {
         addGameObjects(walls);
     }
 
-    protected void initializeBall() {
+    /**
+     * Initializes the balls of the game.
+     */
+    protected void initializeBalls() {
         for (int i = 0; i < DEFAULT_BALLS_NUMBER; i++) {
             var ball = new MainBall();
             this.addGameObjects(ball);
@@ -215,14 +266,22 @@ public class BrickerGameManager extends GameManager {
         }
     }
 
+    /**
+     * Initializes the paddle of the game.
+     * 
+     * @return the paddle
+     */
     protected Paddle initializePaddle() {
         var paddle = new Paddle();
         this.addGameObjects(paddle);
         return paddle;
     }
 
+    /**
+     * Initializes the bricks of the game.
+     */
     protected void initializeBricks() {
-        var bricksAreaHeight = (dims.y() - 2 * BRICKS_AREA_MARGIN) * BRICKS_AREA_HEIGHT_RATIO;
+        var bricksAreaHeight = (dims.y() - 2 * BRICKS_AREA_MARGIN) * MAX_BRICKS_AREA_HEIGHT_RATIO;
         var bricksPerRow = Services.getService(BricksNumber.class).getCols();
         var bricksPerColumn = Services.getService(BricksNumber.class).getRows();
         var brickSize = new Vector2(
@@ -241,6 +300,9 @@ public class BrickerGameManager extends GameManager {
         }
     }
 
+    /**
+     * Initializes the game over wall (the bottom wall).
+     */
     protected void initializeGameOverWall() {
         var wall = new BottomWall() {
             @Override
@@ -249,7 +311,7 @@ public class BrickerGameManager extends GameManager {
                     BallBase ball = (BallBase) other;
                     gameObjects().removeGameObject(ball);
                     Services.getService(Logger.class).logInformation(
-                            "%s removed via game over wall", ball);
+                            "%s removed via game over wall", ball.getClass().getSimpleName());
                     if (!(ball instanceof MainBall))
                         return;
                     balls--;
@@ -263,13 +325,16 @@ public class BrickerGameManager extends GameManager {
                     if (lives <= 0) {
                         loseGame();
                     }
-                    initializeBall();
+                    initializeBalls();
                 }
             }
         };
         this.addGameObjects(wall);
     }
 
+    /**
+     * Initializes the lives display.
+     */
     protected void initializeLivesDisplay() {
         livesDisplay = new Lives(
                 new Vector2(5, dims.y() - 25), () -> lives);
@@ -278,7 +343,7 @@ public class BrickerGameManager extends GameManager {
     }
 
     /**
-     * initializes the game
+     * Initializes the game.
      * 
      * @param imageReader      the image reader
      * @param soundReader      the sound reader
@@ -303,7 +368,7 @@ public class BrickerGameManager extends GameManager {
 
         initializeWalls();
 
-        initializeBall();
+        initializeBalls();
 
         initializePaddle();
 
@@ -314,6 +379,15 @@ public class BrickerGameManager extends GameManager {
         initializeLivesDisplay();
     }
 
+    /**
+     * A method which is called every frame and updates the game.
+     * if the player presses Q, the game closes.
+     * if the player presses R, the game resets.
+     * if the player presses W, the game wins.
+     * if the player presses P, the game pouses/unpouses.
+     * 
+     * @param deltaTime the time passed since the last update
+     */
     @Override
     public void update(float deltaTime) {
         if (!poused) {
@@ -333,6 +407,12 @@ public class BrickerGameManager extends GameManager {
     }
     // #endregion
 
+    /**
+     * The main method of the game.
+     * 
+     * @param args the command line arguments
+     * @throws Exception if something goes wrong
+     */
     public static void main(String[] args) throws Exception {
         try {
             Services.registerService(BricksNumber.class,
