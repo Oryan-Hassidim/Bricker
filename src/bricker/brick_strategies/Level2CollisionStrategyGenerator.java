@@ -5,7 +5,7 @@ import java.util.Random;
 
 public class Level2CollisionStrategyGenerator implements CollisionStrategyGenerator {
 
-    private static final int MAX_DUAL_BEHAVIOR_DEPTH = 3;
+    private static final int MAX_ACTUAL_BEHAVIORS_AMOUNT = 3;
 
     protected BasicCollisionStrategy basicStrategy = new BasicCollisionStrategy();
 
@@ -35,7 +35,8 @@ public class Level2CollisionStrategyGenerator implements CollisionStrategyGenera
         var rand = Services.getService(Random.class);
         var index = rand.nextInt(strategies.length);
         if (index == strategies.length - 1) {
-            return new DualBehaviorCollisionStrategy(MAX_DUAL_BEHAVIOR_DEPTH,
+            return new DualBehaviorCollisionStrategy(
+                    MAX_ACTUAL_BEHAVIORS_AMOUNT,
                     addPucksStrategy, extraPaddleStrategy, cameraChangeStrategy, addLifeStrategy);
         }
         return strategies[index];

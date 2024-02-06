@@ -1,4 +1,4 @@
-import java.awt.Color;
+
 import bricker.brick_strategies.CollisionStrategyGenerator;
 import bricker.brick_strategies.Level2CollisionStrategyGenerator;
 import bricker.gameobjects.*;
@@ -13,7 +13,7 @@ import danogl.gui.SoundReader;
 import danogl.gui.UserInputListener;
 import danogl.gui.WindowController;
 import danogl.gui.rendering.Camera;
-import danogl.gui.rendering.RectangleRenderable;
+import danogl.gui.rendering.Renderable;
 import danogl.util.Vector2;
 import java.util.Random;
 import java.awt.event.KeyEvent;
@@ -28,7 +28,7 @@ public class BrickerGameManager extends GameManager {
     // #region Constants
     private static final Vector2 DEFAULT_WINDOW_SIZE = new Vector2(700, 500);
 
-    private static final int WALL_WIDTH = 50;
+    public static final int WALL_WIDTH = 50;
     private static final int DEFAULT_BRICKS_PER_ROW = 8;
     private static final int DEFAULT_BRICKS_PER_COLUMN = 7;
     private static final int BRICKS_AREA_MARGIN = 10;
@@ -37,10 +37,10 @@ public class BrickerGameManager extends GameManager {
     private static final float BRICKS_AREA_HEIGHT_RATIO = 0.4f;
     private static final String LOSE_MESSAGE = "You lose! Play again?";
     private static final String WIN_MESSAGE = "You win! Play again?";
+    protected static final int MAX_LIVES = 4;
 
     // paths
     private static final String BACKGROUND_IMAGE_PATH = "assets/DARK_BG2_small.jpeg";
-    private static final String BRICK_IMAGE_PATH = "assets/brick.png";
 
     // #endregion
 
@@ -55,7 +55,7 @@ public class BrickerGameManager extends GameManager {
     private WindowController windowController;
     private Vector2 dims;
 
-    private lives livesDisplay;
+    private Lives livesDisplay;
     // #endregion
 
     // #region commands
@@ -71,9 +71,12 @@ public class BrickerGameManager extends GameManager {
         public void remove(GameObject gameObject, int layer) {
             var removed = gameObjects().removeGameObject(gameObject, layer);
             if (!removed) {
-                Services.getService(Logger.class).logError("failed to remove game object %s", gameObject);
+                Services.getService(Logger.class).logError("failed to remove game object %s via command", gameObject);
                 return;
             }
+            Services.getService(Logger.class).logInformation(
+                    "removed game object %s via command",
+                    gameObject.getClass().getSimpleName());
             if (!(gameObject instanceof Brick))
                 return;
             bricks--;
@@ -90,7 +93,7 @@ public class BrickerGameManager extends GameManager {
     private AddLifeCommand addLifeCommand = new AddLifeCommand() {
         @Override
         public void addLife() {
-            lives++;
+            lives = Math.min(lives + 1, MAX_LIVES);
             livesDisplay.LivesChanged();
         }
     };
@@ -181,7 +184,7 @@ public class BrickerGameManager extends GameManager {
     }
 
     protected void initializeWalls() {
-        var wallImage = new RectangleRenderable(Color.red);
+        Renderable wallImage = null;
         var walls = new GameObject[] {
                 new GameObject( // top
                         new Vector2(0, -WALL_WIDTH),
@@ -220,8 +223,6 @@ public class BrickerGameManager extends GameManager {
         var brickSize = new Vector2(
                 (dims.x() - 2 * BRICKS_AREA_MARGIN - (bricksPerRow - 1) * BRICKS_GAP) / bricksPerRow,
                 Math.min(15, (bricksAreaHeight - (bricksPerColumn - 1) * BRICKS_GAP) / bricksPerColumn));
-        var brickImage = imageReader.readImage(BRICK_IMAGE_PATH, true);
-        var collisionStrategyGenerator = Services.getService(CollisionStrategyGenerator.class);
         bricks = bricksPerRow * bricksPerColumn;
         for (int i = 0; i < bricksPerRow; i++) {
             for (int j = 0; j < bricksPerColumn; j++) {
@@ -229,21 +230,21 @@ public class BrickerGameManager extends GameManager {
                         new Vector2(
                                 BRICKS_AREA_MARGIN + i * (brickSize.x() + BRICKS_GAP),
                                 BRICKS_AREA_MARGIN + j * (brickSize.y() + BRICKS_GAP)),
-                        brickSize, brickImage, collisionStrategyGenerator.generateStrategy());
+                        brickSize);
                 this.addGameObjects(brick);
             }
         }
     }
 
     protected void initializeGameOverWall() {
-        var brickSize = new Vector2(dims.x(), 20);
-        var brick = new GameObject(new Vector2(0, dims.y()),
-                brickSize, null) {
+        var wall = new BottomWall() {
             @Override
             public void onCollisionEnter(GameObject other, Collision collision) {
                 if (other instanceof BallBase) {
                     BallBase ball = (BallBase) other;
                     gameObjects().removeGameObject(ball);
+                    Services.getService(Logger.class).logInformation(
+                            "%s removed via gameover wall", ball);
                     if (!(ball instanceof Ball))
                         return;
                     balls--;
@@ -258,11 +259,11 @@ public class BrickerGameManager extends GameManager {
                 }
             }
         };
-        this.addGameObjects(brick);
+        this.addGameObjects(wall);
     }
 
     protected void initializeLivesDisplay() {
-        livesDisplay = new lives(
+        livesDisplay = new Lives(
                 new Vector2(5, dims.y() - 25), () -> lives);
         this.gameObjects().addGameObject(livesDisplay, Layer.UI);
     }
@@ -329,7 +330,13 @@ public class BrickerGameManager extends GameManager {
                             DEFAULT_BRICKS_PER_ROW,
                             DEFAULT_BRICKS_PER_COLUMN));
         }
-        BrickerGameManager gm = new BrickerGameManager();
+        BrickerGameManager gm = new BrickerGameManager() {
+            @Override
+            protected void configureServices(
+                    ImageReader ir, SoundReader sr, UserInputListener il, WindowController wc) {
+                super.configureServices(ir, sr, il, wc);
+            }
+        };
         gm.run();
     }
 }

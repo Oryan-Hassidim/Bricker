@@ -4,6 +4,7 @@ import org.junit.Test;
 
 public class Tests {
     @Test
-    public void test1() {
+    public void test() {
+        System.out.println("Test");
     }
 }

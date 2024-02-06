@@ -7,7 +7,7 @@ import danogl.GameObject;
 import danogl.gui.rendering.Camera;
 import danogl.util.Vector2;
 
-class CameraChangeStrategy extends BasicCollisionStrategy {
+public class CameraChangeStrategy extends BasicCollisionStrategy {
     private final class BallCamera extends Camera {
         private final Ball ball;
         private final int count;
@@ -23,7 +23,7 @@ class CameraChangeStrategy extends BasicCollisionStrategy {
         @Override
         public void update(float delta) {
             super.update(delta);
-            if (ball.getCollisionCounter() < count)
+            if (ball.getCollisionCounter() <= count)
                 return;
             Services.getService(SetCameraCommand.class).setCamera(null);
             cameraSet = false;

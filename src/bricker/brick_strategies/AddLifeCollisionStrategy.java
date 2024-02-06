@@ -17,7 +17,7 @@ public class AddLifeCollisionStrategy extends BasicCollisionStrategy {
             return;
         }
         var brick = (Brick) thisObject;
-        var life =  new Life(brick.getCenter());
+        var life = new Life(brick.getCenter());
         Services.getService(AddGameObjectCommand.class).add(life);
     }
 

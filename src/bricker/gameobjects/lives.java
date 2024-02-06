@@ -12,7 +12,7 @@ import danogl.gui.rendering.TextRenderable;
 import danogl.util.Vector2;
 import java.awt.Color;
 
-public class lives extends GameObject {
+public class Lives extends GameObject {
 
     public static final String HEART_IMAGE_PATH = "assets/heart.png";
     private static final int GAP = -4;
@@ -24,7 +24,7 @@ public class lives extends GameObject {
     private GameObject textObject;
     private ImageRenderable heartImage;
 
-    public lives(
+    public Lives(
             Vector2 topLeftCorner,
             getter<Integer> getLives) {
         super(topLeftCorner, new Vector2(20, HEIGHT), null);

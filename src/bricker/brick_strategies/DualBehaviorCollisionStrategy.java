@@ -7,31 +7,33 @@ import danogl.GameObject;
 public class DualBehaviorCollisionStrategy extends BasicCollisionStrategy {
 
     private static final int BEHAVIORS_AMOUNT = 2;
-    private static final int MAX_ACTUAL_BEHAVIORS_AMOUNT = 3;
 
     private CollisionStrategy[] strategies = new CollisionStrategy[BEHAVIORS_AMOUNT];
-    private int actualStrategiesAmount;
+    private int actualStrategies;
 
-    public DualBehaviorCollisionStrategy(int depth, CollisionStrategy... strategies) {
+    public DualBehaviorCollisionStrategy(int maxStrategies, CollisionStrategy... strategies) {
         super();
         var rand = Services.getService(Random.class);
         for (int i = 0; i < BEHAVIORS_AMOUNT
-                && actualStrategiesAmount <= MAX_ACTUAL_BEHAVIORS_AMOUNT; i++) {
+                && actualStrategies <= maxStrategies; i++) {
 
             var maxIndex = strategies.length;
-            if (depth > 0 && actualStrategiesAmount + 2 <= MAX_ACTUAL_BEHAVIORS_AMOUNT)
+            var nextMax = maxStrategies - actualStrategies - (BEHAVIORS_AMOUNT - i - 1);
+            if (nextMax >= BEHAVIORS_AMOUNT)
                 maxIndex++;
             var index = rand.nextInt(maxIndex);
 
             if (index == strategies.length) {
-                var dual = new DualBehaviorCollisionStrategy(depth - 1, strategies);
+                var dual = new DualBehaviorCollisionStrategy(
+                        nextMax,
+                        strategies);
                 this.strategies[i] = dual;
-                actualStrategiesAmount += dual.actualStrategiesAmount;
+                actualStrategies += dual.actualStrategies;
                 continue;
             }
 
             this.strategies[i] = strategies[index];
-            actualStrategiesAmount++;
+            actualStrategies++;
         }
     }
 

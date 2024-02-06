@@ -12,15 +12,15 @@ public class Life extends GameObject {
 
     public Life(Vector2 center) {
         super(Vector2.ZERO,
-                new Vector2(lives.HEIGHT, lives.HEIGHT),
-                Services.getService(ImageReader.class).readImage(lives.HEART_IMAGE_PATH, true));
+                new Vector2(Lives.HEIGHT, Lives.HEIGHT),
+                Services.getService(ImageReader.class).readImage(Lives.HEART_IMAGE_PATH, true));
         setCenter(center);
         setVelocity(Vector2.DOWN.mult(100));
     }
 
     @Override
     public boolean shouldCollideWith(GameObject other) {
-        if (other instanceof ExtraPaddle || other instanceof BallBase)
+        if (!(other instanceof Paddle || other instanceof BottomWall))
             return false;
         return super.shouldCollideWith(other);
     }

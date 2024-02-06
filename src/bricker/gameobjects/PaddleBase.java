@@ -8,7 +8,7 @@ import danogl.gui.ImageReader;
 import danogl.gui.UserInputListener;
 import danogl.util.Vector2;
 
-public class PaddleBase extends GameObject {
+public abstract class PaddleBase extends GameObject {
 // #region Constants
     private static final String PADDLE_IMAGE_PATH = "assets/paddle.png";
     private static final Vector2 PADDEL_SIZE = new Vector2(100, 15);

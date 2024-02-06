@@ -1,12 +1,18 @@
 package bricker.gameobjects;
 
 import bricker.brick_strategies.CollisionStrategy;
+import bricker.brick_strategies.CollisionStrategyGenerator;
+import bricker.utils.Services;
 import danogl.GameObject;
 import danogl.collisions.Collision;
-import danogl.gui.rendering.Renderable;
+import danogl.gui.ImageReader;
 import danogl.util.Vector2;
 
 public class Brick extends GameObject {
+
+    // #region Constants
+    private static final String BRICK_IMAGE_PATH = "assets/brick.png";
+    // #endregion
 
     // #region fields
     private CollisionStrategy collisionStrategy;
@@ -14,10 +20,13 @@ public class Brick extends GameObject {
 
     // #region constructors
     public Brick(
-            Vector2 topLeftCorner, Vector2 dimensions, Renderable renderable,
-            CollisionStrategy collisionStrategy) {
-        super(topLeftCorner, dimensions, renderable);
-        this.collisionStrategy = collisionStrategy;
+            Vector2 topLeftCorner, Vector2 dimensions) {
+        super(
+                topLeftCorner, dimensions,
+                Services.getService(ImageReader.class)
+                        .readImage(BRICK_IMAGE_PATH, true));
+        this.collisionStrategy = Services.getService(
+                CollisionStrategyGenerator.class).generateStrategy();
     }
     // #endregion
 

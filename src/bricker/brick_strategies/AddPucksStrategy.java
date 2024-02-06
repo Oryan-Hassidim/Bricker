@@ -6,7 +6,7 @@ import bricker.utils.Services;
 import danogl.GameObject;
 
 public class AddPucksStrategy extends BasicCollisionStrategy {
-    private static final int ADD_PUCKS_NUMBER = 3;
+    private static final int ADD_PUCKS_NUMBER = 2;
 
     @Override
     public void onCollision(GameObject thisObject, GameObject otherObject) {

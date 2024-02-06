@@ -63,7 +63,9 @@ public abstract class BallBase extends GameObject {
         this.setVelocity(newVelocity);
         this.collisionCounter++;
         this.collisionSound.play();
-        logger.logInformation("Ball collided with %s. collisions count so on: %d", other.getClass().getSimpleName(),
+        logger.logInformation("%s collided with %s. collisions counter: %d",
+                this.getClass().getSimpleName(),
+                other.getClass().getSimpleName(),
                 collisionCounter);
     }
 
