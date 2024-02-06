@@ -1,8 +1,11 @@
 package bricker.gameobjects;
 
-import bricker.utils.ParametrizedCommand;
+import bricker.utils.AddGameObjectCommand;
+import bricker.utils.RemoveGameObjectCommand;
+import bricker.utils.Services;
 import bricker.utils.getter;
 import danogl.GameObject;
+import danogl.collisions.Layer;
 import danogl.gui.ImageReader;
 import danogl.gui.rendering.ImageRenderable;
 import danogl.gui.rendering.TextRenderable;
@@ -11,41 +14,37 @@ import java.awt.Color;
 
 public class lives extends GameObject {
 
-    private static final String HEART_IMAGE_PATH = "assets/heart.png";
-    private static final int GAP = 2;
+    public static final String HEART_IMAGE_PATH = "assets/heart.png";
+    private static final int GAP = -4;
+    public static final int HEIGHT = 20;
+
     private getter<Integer> getLives;
-    private ImageRenderable heartImage;
-    private int height;
     private GameObject[] hearts = new GameObject[0];
-    private ParametrizedCommand<GameObject> addGameObject;
-    private ParametrizedCommand<GameObject> removeGameObject;
     private TextRenderable textRenderable;
     private GameObject textObject;
+    private ImageRenderable heartImage;
 
     public lives(
-            Vector2 topLeftCorner, int height,
-            getter<Integer> getLives, ImageReader imageReader,
-            ParametrizedCommand<GameObject> addGameObject,
-            ParametrizedCommand<GameObject> removeGameObject) {
-        super(topLeftCorner, new Vector2(20, height), null);
-        this.height = height;
+            Vector2 topLeftCorner,
+            getter<Integer> getLives) {
+        super(topLeftCorner, new Vector2(20, HEIGHT), null);
         this.getLives = getLives;
-        this.addGameObject = addGameObject;
-        this.removeGameObject = removeGameObject;
-        heartImage = imageReader.readImage(HEART_IMAGE_PATH, true);
+        
+        heartImage = Services.getService(ImageReader.class).readImage(HEART_IMAGE_PATH, true);
         textRenderable = new TextRenderable("", "Comic Sans MS");
         textObject = new GameObject(
             getTopLeftCorner(), Vector2.ZERO,
             textRenderable);
-            addGameObject.invoke(textObject);
+            Services.getService(AddGameObjectCommand.class).add(textObject, Layer.UI);
         LivesChanged();
     }
     
     public void LivesChanged() {
         
+        var remover = Services.getService(RemoveGameObjectCommand.class);
         // remove old hearts
         for (var heart : hearts) {
-            removeGameObject.invoke(heart);
+            remover.remove(heart, Layer.UI);
         }
         
         var l = getLives.get();
@@ -62,18 +61,19 @@ public class lives extends GameObject {
             textRenderable.setColor(Color.RED);
         }
         textRenderable.setString(text);
-        var textWidth = text.length() * height + GAP;
-        textObject.setDimensions(new Vector2(textWidth, height));
+        var textWidth = text.length() * HEIGHT + GAP;
+        textObject.setDimensions(new Vector2(textWidth, HEIGHT));
         textObject.setTopLeftCorner(getTopLeftCorner());
 
         // hearts
+        var adder = Services.getService(AddGameObjectCommand.class);
         hearts = new GameObject[l];
         for (int i = 0; i < l; i++) {
             var heart = new GameObject(
-                    new Vector2(getTopLeftCorner().x() + textWidth + i * (height + GAP), getTopLeftCorner().y()),
-                    new Vector2(height, height),
+                    new Vector2(getTopLeftCorner().x() + textWidth + i * (HEIGHT + GAP), getTopLeftCorner().y()),
+                    new Vector2(HEIGHT, HEIGHT),
                     heartImage);
-            addGameObject.invoke(heart);
+            adder.add(heart, Layer.UI);
             hearts[i] = heart;
         }
     }

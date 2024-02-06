@@ -1,13 +1,8 @@
 import java.awt.Color;
-import bricker.brick_strategies.BasicCollisionStrategy;
-import bricker.brick_strategies.CollisionStrategy;
+import bricker.brick_strategies.CollisionStrategyGenerator;
+import bricker.brick_strategies.Level2CollisionStrategyGenerator;
 import bricker.gameobjects.*;
-import bricker.utils.AddGameObjectCommand;
-import bricker.utils.BasicLogger;
-import bricker.utils.Logger;
-import bricker.utils.ParametrizedCommand;
-import bricker.utils.RemoveGameObjectCommand;
-import bricker.utils.Services;
+import bricker.utils.*;
 import danogl.GameManager;
 import danogl.GameObject;
 import danogl.collisions.Collision;
@@ -17,6 +12,7 @@ import danogl.gui.ImageReader;
 import danogl.gui.SoundReader;
 import danogl.gui.UserInputListener;
 import danogl.gui.WindowController;
+import danogl.gui.rendering.Camera;
 import danogl.gui.rendering.RectangleRenderable;
 import danogl.util.Vector2;
 import java.util.Random;
@@ -29,10 +25,9 @@ import java.awt.event.KeyEvent;
  */
 public class BrickerGameManager extends GameManager {
 
-    // #region inner classes
-    // #endregion
-
     // #region Constants
+    private static final Vector2 DEFAULT_WINDOW_SIZE = new Vector2(700, 500);
+
     private static final int WALL_WIDTH = 50;
     private static final int DEFAULT_BRICKS_PER_ROW = 8;
     private static final int DEFAULT_BRICKS_PER_COLUMN = 7;
@@ -50,21 +45,16 @@ public class BrickerGameManager extends GameManager {
     // #endregion
 
     // #region fields
-    private Logger logger = Services.getService(Logger.class);
-    
-    private int bricksPerRow;
-    private int bricksPerColumn;
-    
     private int bricks;
     private int lives;
     protected int balls;
-    
+
     private ImageReader imageReader;
     private SoundReader soundReader;
     private UserInputListener inputListener;
     private WindowController windowController;
     private Vector2 dims;
-    
+
     private lives livesDisplay;
     // #endregion
 
@@ -79,52 +69,30 @@ public class BrickerGameManager extends GameManager {
     private RemoveGameObjectCommand removeGameObjectCommand = new RemoveGameObjectCommand() {
         @Override
         public void remove(GameObject gameObject, int layer) {
-            gameObjects().removeGameObject(gameObject, layer);
+            var removed = gameObjects().removeGameObject(gameObject, layer);
+            if (!removed) {
+                Services.getService(Logger.class).logError("failed to remove game object %s", gameObject);
+                return;
+            }
+            if (!(gameObject instanceof Brick))
+                return;
+            bricks--;
+            if (bricks <= 0)
+                winGame();
         }
     };
-
-    // #endregion
-
-    // #region collision strategies
-    private BasicCollisionStrategy basicCollisionStrategy = new BasicCollisionStrategy();
-    private BasicCollisionStrategy addPucksStrategy = new BasicCollisionStrategy() {
+    private SetCameraCommand setCameraCommand = new SetCameraCommand() {
         @Override
-        public void onCollision(GameObject thisObject, GameObject otherObject) {
-            super.onCollision(thisObject, otherObject);
-            if (!(thisObject instanceof Ball))
-            {
-                logger.logError("ball collision strategy called with non-ball object");
-                return;
-            }
-            if (!(otherObject instanceof Puck))
-            {
-                logger.logError("ball collision strategy called with non-puck object");
-                return;
-            }
-            Ball ball = (Ball) thisObject;
-            Puck puck = (Puck) otherObject;
-            ball.setVelocity(ball.getVelocity().add(puck.getVelocity()));
+        public void setCamera(Camera camera) {
+            mySetCamera(camera);
         }
     };
-    private CollisionStrategy[] collisionStrategies = new CollisionStrategy[] {
-            basicCollisionStrategy,
-            basicCollisionStrategy,
-            basicCollisionStrategy,
-            basicCollisionStrategy,
-            basicCollisionStrategy,
-            // add new balls collision strategy
-            new BasicCollisionStrategy() {
-                @Override
-                public void onCollision(GameObject thisObject, GameObject otherObject) {
-                    super.onCollision(thisObject, otherObject);
-                    if (!(thisObject instanceof Brick))
-                    {
-                        logger.logError("ball collision strategy called with non-brick object");
-                        return;
-                    }
-                    
-                }
-            }
+    private AddLifeCommand addLifeCommand = new AddLifeCommand() {
+        @Override
+        public void addLife() {
+            lives++;
+            livesDisplay.LivesChanged();
+        }
     };
 
     // #endregion
@@ -140,27 +108,17 @@ public class BrickerGameManager extends GameManager {
      * @param bricksPerRow    the number of bricks per row
      * @param bricksPerColumn the number of bricks per column
      */
-    public BrickerGameManager(
-            String title, Vector2 windowSize,
-            int bricksPerRow, int bricksPerColumn) {
-        super(title, windowSize);
-        this.dims = windowSize;
-        this.bricksPerRow = bricksPerRow;
-        this.bricksPerColumn = bricksPerColumn;
-    }
-
-    /**
-     * creates a new bricker game manager with a given title and window size
-     * 
-     * @param title      the title of the game
-     * @param windowSize the size of the window
-     */
-    public BrickerGameManager(String title, Vector2 windowSize) {
-        this(title, windowSize, DEFAULT_BRICKS_PER_ROW, DEFAULT_BRICKS_PER_COLUMN);
+    public BrickerGameManager() {
+        super("Bricker", DEFAULT_WINDOW_SIZE);
+        Services.registerService(Vector2.class, DEFAULT_WINDOW_SIZE);
     }
     // #endregion
 
     // #region methods
+
+    private void mySetCamera(Camera camera) {
+        setCamera(camera);
+    }
 
     protected void winGame() {
         if (!windowController.openYesNoDialog(WIN_MESSAGE)) {
@@ -187,26 +145,34 @@ public class BrickerGameManager extends GameManager {
         }
     }
 
-    private void configureServices(
+    protected void configureServices(
             ImageReader imageReader, SoundReader soundReader,
             UserInputListener inputListener, WindowController windowController) {
-        this.imageReader = imageReader;
-        this.soundReader = soundReader;
-        this.inputListener = inputListener;
-        this.windowController = windowController;
+
+        Services.registerService(Logger.class, new BasicLogger());
+
         Services.registerService(ImageReader.class, imageReader);
         Services.registerService(SoundReader.class, soundReader);
         Services.registerService(UserInputListener.class, inputListener);
         Services.registerService(WindowController.class, windowController);
-        Services.registerService(Vector2.class, dims);
-        
+        this.imageReader = imageReader;
+        this.soundReader = soundReader;
+        this.inputListener = inputListener;
+        this.windowController = windowController;
+
+        Services.registerService(CollisionStrategyGenerator.class,
+                new Level2CollisionStrategyGenerator());
+        Services.registerService(Vector2.class, windowController.getWindowDimensions());
+
         Services.registerService(AddGameObjectCommand.class, addGameObjectCommand);
         Services.registerService(RemoveGameObjectCommand.class, removeGameObjectCommand);
+        Services.registerService(SetCameraCommand.class, setCameraCommand);
+        Services.registerService(AddLifeCommand.class, addLifeCommand);
 
         Services.registerService(Random.class, new Random());
     }
 
-    private void initializeBackground() {
+    protected void initializeBackground() {
         var background = new GameObject(
                 Vector2.ZERO, dims,
                 imageReader.readImage(BACKGROUND_IMAGE_PATH, false));
@@ -214,7 +180,7 @@ public class BrickerGameManager extends GameManager {
         this.gameObjects().addGameObject(background, Layer.BACKGROUND);
     }
 
-    private void initializeWalls() {
+    protected void initializeWalls() {
         var wallImage = new RectangleRenderable(Color.red);
         var walls = new GameObject[] {
                 new GameObject( // top
@@ -234,34 +200,28 @@ public class BrickerGameManager extends GameManager {
         addGameObjects(walls);
     }
 
-    private Ball initializeBall() {
+    protected Ball initializeBall() {
         var ball = new Ball();
         this.addGameObjects(ball);
         balls++;
         return ball;
     }
 
-    private Paddle initializePaddle() {
-        var paddle = new Paddle(new Vector2(dims.x() / 2, dims.y() - 50));
+    protected Paddle initializePaddle() {
+        var paddle = new Paddle();
         this.addGameObjects(paddle);
         return paddle;
     }
 
-    private void removeBrick(GameObject param) {
-        var removed = gameObjects().removeGameObject(param);
-        if (!removed)
-            logger.log("failed to remove game object" + param);
-        bricks--;
-        if (bricks <= 0)
-            winGame();
-    }
-
-    private void initializeBricks() {
+    protected void initializeBricks() {
         var bricksAreaHeight = (dims.y() - 2 * BRICKS_AREA_MARGIN) * BRICKS_AREA_HEIGHT_RATIO;
+        var bricksPerRow = Services.getService(BrickerNumber.class).getCols();
+        var bricksPerColumn = Services.getService(BrickerNumber.class).getRows();
         var brickSize = new Vector2(
                 (dims.x() - 2 * BRICKS_AREA_MARGIN - (bricksPerRow - 1) * BRICKS_GAP) / bricksPerRow,
-                (bricksAreaHeight - (bricksPerColumn - 1) * BRICKS_GAP) / bricksPerColumn);
+                Math.min(15, (bricksAreaHeight - (bricksPerColumn - 1) * BRICKS_GAP) / bricksPerColumn));
         var brickImage = imageReader.readImage(BRICK_IMAGE_PATH, true);
+        var collisionStrategyGenerator = Services.getService(CollisionStrategyGenerator.class);
         bricks = bricksPerRow * bricksPerColumn;
         for (int i = 0; i < bricksPerRow; i++) {
             for (int j = 0; j < bricksPerColumn; j++) {
@@ -269,13 +229,13 @@ public class BrickerGameManager extends GameManager {
                         new Vector2(
                                 BRICKS_AREA_MARGIN + i * (brickSize.x() + BRICKS_GAP),
                                 BRICKS_AREA_MARGIN + j * (brickSize.y() + BRICKS_GAP)),
-                        brickSize, brickImage, basicCollisionStrategy);
+                        brickSize, brickImage, collisionStrategyGenerator.generateStrategy());
                 this.addGameObjects(brick);
             }
         }
     }
 
-    private void initializeGameOverWall() {
+    protected void initializeGameOverWall() {
         var brickSize = new Vector2(dims.x(), 20);
         var brick = new GameObject(new Vector2(0, dims.y()),
                 brickSize, null) {
@@ -301,20 +261,9 @@ public class BrickerGameManager extends GameManager {
         this.addGameObjects(brick);
     }
 
-    private void initializeLivesDisplay() {
+    protected void initializeLivesDisplay() {
         livesDisplay = new lives(
-                new Vector2(5, dims.y() - 25), 20, () -> lives, imageReader,
-                new ParametrizedCommand<GameObject>() {
-                    @Override
-                    public void invoke(GameObject param) {
-                        gameObjects().addGameObject(param, Layer.UI);
-                    }
-                }, new ParametrizedCommand<GameObject>() {
-                    @Override
-                    public void invoke(GameObject param) {
-                        gameObjects().removeGameObject(param, Layer.UI);
-                    }
-                });
+                new Vector2(5, dims.y() - 25), () -> lives);
         this.gameObjects().addGameObject(livesDisplay, Layer.UI);
     }
 
@@ -369,16 +318,18 @@ public class BrickerGameManager extends GameManager {
     // #endregion
 
     public static void main(String[] args) throws Exception {
-
-        Services.registerService(Logger.class, new BasicLogger());
-
-        BrickerGameManager gm;
         try {
-            gm = new BrickerGameManager("Bricker", new Vector2(700, 500), Integer.parseInt(args[0]),
-                    Integer.parseInt(args[1]));
+            Services.registerService(BrickerNumber.class,
+                    new BrickerNumber(
+                            Integer.parseInt(args[0]),
+                            Integer.parseInt(args[1])));
         } catch (Exception e) {
-            gm = new BrickerGameManager("Bricker", new Vector2(700, 500));
+            Services.registerService(BrickerNumber.class,
+                    new BrickerNumber(
+                            DEFAULT_BRICKS_PER_ROW,
+                            DEFAULT_BRICKS_PER_COLUMN));
         }
+        BrickerGameManager gm = new BrickerGameManager();
         gm.run();
     }
 }
