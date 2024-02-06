@@ -17,12 +17,35 @@ import java.util.Hashtable;
  * @author Oryan Hassidim
  */
 public class Services {
+    /** The services collection. */
     private static Dictionary<Class<?>, Object> services = new Hashtable<Class<?>, Object>();
 
-    public static <T> void registerService(Class<T> serviceType, T service) {
+    /**
+     * Registers a service.
+     * 
+     * @param <T> the type of the service
+     * @param serviceType the type of the service
+     * @param service the service
+     * @throws NullPointerException if the service or the serviceType is null
+     */
+    public static <T> void registerService(Class<T> serviceType, T service) throws NullPointerException {
+        if (service == null) {
+            throw new NullPointerException("service");
+        }
+        if (serviceType == null) {
+            throw new NullPointerException("serviceType");
+        }
         services.put(serviceType, service);
     }
 
+    /**
+     * Gets a service.
+     * 
+     * @param <T> the type of the service
+     * @param serviceType the type of the service
+     * @return the service
+     * @throws NullPointerException if the service is not found
+     */
     public static <T> T getService(Class<T> serviceType) throws NullPointerException {
         return serviceType.cast(services.get(serviceType));
     }

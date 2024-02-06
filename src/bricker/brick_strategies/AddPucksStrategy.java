@@ -5,9 +5,23 @@ import bricker.utils.AddGameObjectCommand;
 import bricker.utils.Services;
 import danogl.GameObject;
 
+/**
+ * Collision strategy for adding 2 pucks to the screen.
+ *  
+ * @see BasicCollisionStrategy
+ * @see CollisionStrategy
+ * @see Puck
+ * @author Oryan Hassidim
+ */
 public class AddPucksStrategy extends BasicCollisionStrategy {
     private static final int ADD_PUCKS_NUMBER = 2;
 
+    /**
+     * Adds 2 pucks to the screen when a brick is hit.
+     * 
+     * @param thisObject the brick that was hit
+     * @param otherObject the object that hit the brick
+     */
     @Override
     public void onCollision(GameObject thisObject, GameObject otherObject) {
         super.onCollision(thisObject, otherObject);

@@ -5,15 +5,16 @@ import bricker.utils.Services;
 import danogl.GameObject;
 
 /**
- * a basic collision strategy that prints a message to the console
- * when a collision is detected
+ * A basic collision strategy that removes the object from the
+ * screen when a collision is detected.
  * 
- * @author Orayn Hassidim
  * @see CollisionStrategy
+ * @author Orayn Hassidim
  */
 public class BasicCollisionStrategy implements CollisionStrategy {
+    
     /**
-     * prints a message to the console when a collision is detected
+     * Removes the object from the screen when a collision is detected.
      * 
      * @param thisObject  the object that this strategy is attached to
      * @param otherObject the object that this object collided with
