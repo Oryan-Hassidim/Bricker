@@ -1,10 +1,10 @@
 package bricker.utils;
 
-public class BrickerNumber {
+public class BricksNumber {
     private int cols;
     private int rows;
 
-    public BrickerNumber(int cols, int rows) {
+    public BricksNumber(int cols, int rows) {
         this.cols = cols;
         this.rows = rows;
     }

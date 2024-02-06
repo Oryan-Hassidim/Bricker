@@ -15,6 +15,8 @@ import danogl.gui.WindowController;
 import danogl.gui.rendering.Camera;
 import danogl.gui.rendering.Renderable;
 import danogl.util.Vector2;
+
+import java.util.Date;
 import java.util.Random;
 import java.awt.event.KeyEvent;
 
@@ -38,6 +40,7 @@ public class BrickerGameManager extends GameManager {
     private static final String LOSE_MESSAGE = "You lose! Play again?";
     private static final String WIN_MESSAGE = "You win! Play again?";
     protected static final int MAX_LIVES = 4;
+    private static final int DEFAULT_BALLS_NUMBER = 3;
 
     // paths
     private static final String BACKGROUND_IMAGE_PATH = "assets/DARK_BG2_small.jpeg";
@@ -49,8 +52,10 @@ public class BrickerGameManager extends GameManager {
     private int lives;
     protected int balls;
 
+    protected boolean poused;
+    private Date lastPoused = new Date();
+
     private ImageReader imageReader;
-    private SoundReader soundReader;
     private UserInputListener inputListener;
     private WindowController windowController;
     private Vector2 dims;
@@ -75,7 +80,7 @@ public class BrickerGameManager extends GameManager {
                 return;
             }
             Services.getService(Logger.class).logInformation(
-                    "removed game object %s via command",
+                    "%s removed via command",
                     gameObject.getClass().getSimpleName());
             if (!(gameObject instanceof Brick))
                 return;
@@ -159,7 +164,6 @@ public class BrickerGameManager extends GameManager {
         Services.registerService(UserInputListener.class, inputListener);
         Services.registerService(WindowController.class, windowController);
         this.imageReader = imageReader;
-        this.soundReader = soundReader;
         this.inputListener = inputListener;
         this.windowController = windowController;
 
@@ -203,11 +207,12 @@ public class BrickerGameManager extends GameManager {
         addGameObjects(walls);
     }
 
-    protected Ball initializeBall() {
-        var ball = new Ball();
-        this.addGameObjects(ball);
-        balls++;
-        return ball;
+    protected void initializeBall() {
+        for (int i = 0; i < DEFAULT_BALLS_NUMBER; i++) {
+            var ball = new Ball();
+            this.addGameObjects(ball);
+            balls++;
+        }
     }
 
     protected Paddle initializePaddle() {
@@ -218,8 +223,8 @@ public class BrickerGameManager extends GameManager {
 
     protected void initializeBricks() {
         var bricksAreaHeight = (dims.y() - 2 * BRICKS_AREA_MARGIN) * BRICKS_AREA_HEIGHT_RATIO;
-        var bricksPerRow = Services.getService(BrickerNumber.class).getCols();
-        var bricksPerColumn = Services.getService(BrickerNumber.class).getRows();
+        var bricksPerRow = Services.getService(BricksNumber.class).getCols();
+        var bricksPerColumn = Services.getService(BricksNumber.class).getRows();
         var brickSize = new Vector2(
                 (dims.x() - 2 * BRICKS_AREA_MARGIN - (bricksPerRow - 1) * BRICKS_GAP) / bricksPerRow,
                 Math.min(15, (bricksAreaHeight - (bricksPerColumn - 1) * BRICKS_GAP) / bricksPerColumn));
@@ -244,13 +249,16 @@ public class BrickerGameManager extends GameManager {
                     BallBase ball = (BallBase) other;
                     gameObjects().removeGameObject(ball);
                     Services.getService(Logger.class).logInformation(
-                            "%s removed via gameover wall", ball);
+                            "%s removed via game over wall", ball);
                     if (!(ball instanceof Ball))
                         return;
                     balls--;
                     if (balls > 0)
                         return;
                     lives--;
+                    if (camera() != null && camera().getObjectFollowed() == ball)
+                        setCamera(null);
+
                     livesDisplay.LivesChanged();
                     if (lives <= 0) {
                         loseGame();
@@ -265,6 +273,7 @@ public class BrickerGameManager extends GameManager {
     protected void initializeLivesDisplay() {
         livesDisplay = new Lives(
                 new Vector2(5, dims.y() - 25), () -> lives);
+        livesDisplay.setCoordinateSpace(CoordinateSpace.CAMERA_COORDINATES);
         this.gameObjects().addGameObject(livesDisplay, Layer.UI);
     }
 
@@ -307,26 +316,32 @@ public class BrickerGameManager extends GameManager {
 
     @Override
     public void update(float deltaTime) {
-        super.update(deltaTime);
+        if (!poused) {
+            super.update(deltaTime);
+        }
         if (inputListener.isKeyPressed(KeyEvent.VK_Q)) {
             windowController.closeWindow();
         } else if (inputListener.isKeyPressed(KeyEvent.VK_R)) {
             windowController.resetGame();
         } else if (inputListener.isKeyPressed(KeyEvent.VK_W)) {
             winGame();
+        } else if (inputListener.isKeyPressed(KeyEvent.VK_P)
+                && new Date().getTime() - lastPoused.getTime() > 200) {
+            poused = !poused;
+            lastPoused = new Date();
         }
     }
     // #endregion
 
     public static void main(String[] args) throws Exception {
         try {
-            Services.registerService(BrickerNumber.class,
-                    new BrickerNumber(
+            Services.registerService(BricksNumber.class,
+                    new BricksNumber(
                             Integer.parseInt(args[0]),
                             Integer.parseInt(args[1])));
         } catch (Exception e) {
-            Services.registerService(BrickerNumber.class,
-                    new BrickerNumber(
+            Services.registerService(BricksNumber.class,
+                    new BricksNumber(
                             DEFAULT_BRICKS_PER_ROW,
                             DEFAULT_BRICKS_PER_COLUMN));
         }

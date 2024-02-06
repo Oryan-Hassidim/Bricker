@@ -1,5 +1,5 @@
 package bricker.utils;
 
-public interface getter<T> {
+public interface Getter<T> {
     T get();
 }

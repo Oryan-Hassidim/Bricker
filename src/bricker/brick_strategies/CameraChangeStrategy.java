@@ -23,7 +23,7 @@ public class CameraChangeStrategy extends BasicCollisionStrategy {
         @Override
         public void update(float delta) {
             super.update(delta);
-            if (ball.getCollisionCounter() <= count)
+            if (ball == this.getObjectFollowed() && ball.getCollisionCounter() <= count)
                 return;
             Services.getService(SetCameraCommand.class).setCamera(null);
             cameraSet = false;
