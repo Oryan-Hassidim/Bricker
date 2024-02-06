@@ -10,7 +10,9 @@ import java.util.Date;
  */
 public interface Logger {
 
+    /** the format of the time in the log. */
     public static final String TIME_FORMAT = "HH:mm:ss";
+    /** the formatter of the time in the log. */
     public static final SimpleDateFormat TIME_FORMATTER = new SimpleDateFormat(TIME_FORMAT);
 
     /**
@@ -59,5 +61,4 @@ public interface Logger {
     public default void logWarning(String message, Object... args) {
         this.logFormatted("[WARNING %s] %s", TIME_FORMATTER.format(new Date()), String.format(message, args));
     }
-
 }

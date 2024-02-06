@@ -1,9 +1,7 @@
 package bricker.brick_strategies;
 
-import bricker.gameobjects.Brick;
 import bricker.gameobjects.Life;
 import bricker.utils.AddGameObjectCommand;
-import bricker.utils.Logger;
 import bricker.utils.Services;
 import danogl.GameObject;
 

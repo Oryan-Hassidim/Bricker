@@ -1,5 +1,11 @@
 package bricker.utils;
 
+/**
+ * A representation of the number of bricks in the game.
+ * 
+ * @see bricker.gameobjects.Brick
+ * @author Orayn Hassidim
+ */
 public class BricksNumber {
     private int cols;
     private int rows;

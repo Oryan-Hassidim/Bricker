@@ -6,7 +6,7 @@ import java.util.Hashtable;
 /**
  * <p>This class is used to register and get services for dependency injection.
  * It is a simple implementation of the Service Locator pattern.
- * It is used to avoid the use of static methods and to make the code more
+ * It is used to avoid the use of static methods and to make the code much more
  * testable.</p>
  * <p>Example:</p>
  * <pre>
