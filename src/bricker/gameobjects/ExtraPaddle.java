@@ -8,16 +8,31 @@ import danogl.GameObject;
 import danogl.collisions.Collision;
 import danogl.util.Vector2;
 
+/**
+ * An extra paddle in the game.
+ * 
+ * @see PaddleBase
+ * @see bricker.brick_strategies.ExtraPaddleStrategy
+ * @author Orayn Hassidim
+ */
 public class ExtraPaddle extends PaddleBase {
 
+    /** The number of collisions before the paddle disappears. */
     private static final int COLLISIONS_BEFORE_DISAPEERING = 4;
-
+    /** The number of collisions before the paddle disappears. */
     private int collisions;
 
+    /**
+     * Constructs a new ExtraPaddle.
+     */
     public ExtraPaddle() {
         super(Services.getService(Vector2.class).mult(0.5f));
     }
 
+    /**
+     * A method which is called when a collision occurs.
+     * On collision with a ball, the number of collisions is decreased.
+     */
     @Override
     public void onCollisionEnter(GameObject other, Collision collision) {
         super.onCollisionEnter(other, collision);
@@ -30,6 +45,10 @@ public class ExtraPaddle extends PaddleBase {
         }
     }
 
+    /**
+     * Initializes the extra paddle.
+     * If the number of collisions is initialized, the paddle is not initialized.
+     */
     public void initialize() {
         if (collisions > 0) {
             return;

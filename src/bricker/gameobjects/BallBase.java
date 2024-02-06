@@ -12,24 +12,41 @@ import danogl.gui.UserInputListener;
 import danogl.gui.rendering.Renderable;
 import danogl.util.Vector2;
 
+/**
+ * A base class for the game's balls.
+ * 
+ * @see GameObject
+ * @see BallBase
+ * @see MainBall
+ * @author Orayn Hassidim
+ */
 public abstract class BallBase extends GameObject {
 
     // #region Constants
     protected static final float MOVEMENT_SPEED = 200;
     protected static final Vector2 DEFAULT_SIZE = new Vector2(20, 20);
-    /**
-     * from https://soundbible.com/2067-Blop.html
-     */
+    /** The path to the collision sound.  
+     * downloaded from https://soundbible.com/2067-Blop.html */
     protected static final String COLLISION_SOUND_PATH = "assets/Bubble5_4.wav";
     // #endregion
 
     // #region fields
+    /** The sound to play when a collision occurs. */
     protected Sound collisionSound;
+    /** The logger. */
     protected Logger logger = Services.getService(Logger.class);
+    /** The number of collisions the ball has had. */
     private int collisionCounter = 0;
     // #endregion
 
     // #region constructors
+    /**
+     * Constructs a new BallBase.
+     * 
+     * @param center     the center of the ball
+     * @param dimensions the dimensions of the ball
+     * @param renderable the renderable of the ball
+     */
     public BallBase(Vector2 center, Vector2 dimensions, Renderable renderable) {
         super(Vector2.ZERO, dimensions, renderable);
         setCenter(center);
@@ -50,7 +67,7 @@ public abstract class BallBase extends GameObject {
 
     // #region methods
     /**
-     * function called when the ball collides with another game object
+     * An action called when a collision occurs.
      * 
      * @param other     the other game object
      * @param collision the collision that occurred
@@ -69,9 +86,15 @@ public abstract class BallBase extends GameObject {
                 collisionCounter);
     }
 
+    /**
+     * A function which called every frame.
+     * If the space key is pressed, the ball moves faster.
+     * 
+     * @param delta the time passed since the last update
+     */
     @Override
-    public void update(float arg0) {
-        super.update(arg0);
+    public void update(float delta) {
+        super.update(delta);
         var inputListener = Services.getService(UserInputListener.class);
         if (inputListener.isKeyPressed(KeyEvent.VK_SPACE)) {
             this.setVelocity(getVelocity().normalized().mult(3 * MOVEMENT_SPEED));

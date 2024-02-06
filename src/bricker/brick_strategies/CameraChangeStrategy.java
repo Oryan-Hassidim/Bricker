@@ -1,6 +1,6 @@
 package bricker.brick_strategies;
 
-import bricker.gameobjects.Ball;
+import bricker.gameobjects.MainBall;
 import bricker.utils.Services;
 import bricker.utils.SetCameraCommand;
 import danogl.GameObject;
@@ -12,7 +12,7 @@ import danogl.util.Vector2;
  * 
  * @see BasicCollisionStrategy
  * @see CollisionStrategy
- * @see Ball
+ * @see MainBall
  * @see Camera
  * @author Oryan Hassidim
  */
@@ -28,7 +28,7 @@ public class CameraChangeStrategy extends BasicCollisionStrategy {
         private static final int NUMBER_OF_COLLISIONS = 4;
 
         /** The ball to follow. */
-        private final Ball ball;
+        private final MainBall ball;
 
         /** The number of collisions the ball needs to be followed for. */
         private final int count;
@@ -38,7 +38,7 @@ public class CameraChangeStrategy extends BasicCollisionStrategy {
          * 
          * @param ball the ball to follow
          */
-        private BallCamera(Ball ball) {
+        private BallCamera(MainBall ball) {
             super(ball, Vector2.ZERO,
                     Services.getService(Vector2.class).mult(1.2f),
                     Services.getService(Vector2.class));
@@ -75,12 +75,12 @@ public class CameraChangeStrategy extends BasicCollisionStrategy {
     @Override
     public void onCollision(GameObject thisObject, GameObject otherObject) {
         super.onCollision(thisObject, otherObject);
-        if (!(otherObject instanceof Ball))
+        if (!(otherObject instanceof MainBall))
             return;
         if (cameraSet)
             return;
 
-        var ball = (Ball) otherObject;
+        var ball = (MainBall) otherObject;
         Camera camera = new BallCamera(ball);
         Services.getService(SetCameraCommand.class).setCamera(camera);
         cameraSet = true;

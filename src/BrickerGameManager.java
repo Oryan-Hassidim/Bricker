@@ -209,7 +209,7 @@ public class BrickerGameManager extends GameManager {
 
     protected void initializeBall() {
         for (int i = 0; i < DEFAULT_BALLS_NUMBER; i++) {
-            var ball = new Ball();
+            var ball = new MainBall();
             this.addGameObjects(ball);
             balls++;
         }
@@ -250,7 +250,7 @@ public class BrickerGameManager extends GameManager {
                     gameObjects().removeGameObject(ball);
                     Services.getService(Logger.class).logInformation(
                             "%s removed via game over wall", ball);
-                    if (!(ball instanceof Ball))
+                    if (!(ball instanceof MainBall))
                         return;
                     balls--;
                     if (balls > 0)
