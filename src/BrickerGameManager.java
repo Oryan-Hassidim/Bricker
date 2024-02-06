@@ -2,9 +2,11 @@ import java.awt.Color;
 import bricker.brick_strategies.BasicCollisionStrategy;
 import bricker.brick_strategies.CollisionStrategy;
 import bricker.gameobjects.*;
+import bricker.utils.AddGameObjectCommand;
 import bricker.utils.BasicLogger;
 import bricker.utils.Logger;
 import bricker.utils.ParametrizedCommand;
+import bricker.utils.RemoveGameObjectCommand;
 import bricker.utils.Services;
 import danogl.GameManager;
 import danogl.GameObject;
@@ -43,26 +45,67 @@ public class BrickerGameManager extends GameManager {
 
     // paths
     private static final String BACKGROUND_IMAGE_PATH = "assets/DARK_BG2_small.jpeg";
-    private static final String BALL_IMAGE_PATH = "assets/ball.png";
-    private static final String PADDLE_IMAGE_PATH = "assets/paddle.png";
     private static final String BRICK_IMAGE_PATH = "assets/brick.png";
 
-    /**
-     * from https://soundbible.com/2067-Blop.html
-     */
-    private static final String COLLISION_SOUND_PATH = "assets/Bubble5_4.wav";
     // #endregion
 
     // #region fields
     private Logger logger = Services.getService(Logger.class);
-    private Random rand = new Random();
-    private ParametrizedCommand<GameObject> removeGameObjectCommand = new ParametrizedCommand<GameObject>() {
+    
+    private int bricksPerRow;
+    private int bricksPerColumn;
+    
+    private int bricks;
+    private int lives;
+    protected int balls;
+    
+    private ImageReader imageReader;
+    private SoundReader soundReader;
+    private UserInputListener inputListener;
+    private WindowController windowController;
+    private Vector2 dims;
+    
+    private lives livesDisplay;
+    // #endregion
+
+    // #region commands
+
+    private AddGameObjectCommand addGameObjectCommand = new AddGameObjectCommand() {
         @Override
-        public void invoke(final GameObject param) {
-            removeBrick(param);
+        public void add(GameObject gameObject, int layer) {
+            gameObjects().addGameObject(gameObject, layer);
         }
     };
-    private BasicCollisionStrategy basicCollisionStrategy = new BasicCollisionStrategy(removeGameObjectCommand);
+    private RemoveGameObjectCommand removeGameObjectCommand = new RemoveGameObjectCommand() {
+        @Override
+        public void remove(GameObject gameObject, int layer) {
+            gameObjects().removeGameObject(gameObject, layer);
+        }
+    };
+
+    // #endregion
+
+    // #region collision strategies
+    private BasicCollisionStrategy basicCollisionStrategy = new BasicCollisionStrategy();
+    private BasicCollisionStrategy addPucksStrategy = new BasicCollisionStrategy() {
+        @Override
+        public void onCollision(GameObject thisObject, GameObject otherObject) {
+            super.onCollision(thisObject, otherObject);
+            if (!(thisObject instanceof Ball))
+            {
+                logger.logError("ball collision strategy called with non-ball object");
+                return;
+            }
+            if (!(otherObject instanceof Puck))
+            {
+                logger.logError("ball collision strategy called with non-puck object");
+                return;
+            }
+            Ball ball = (Ball) thisObject;
+            Puck puck = (Puck) otherObject;
+            ball.setVelocity(ball.getVelocity().add(puck.getVelocity()));
+        }
+    };
     private CollisionStrategy[] collisionStrategies = new CollisionStrategy[] {
             basicCollisionStrategy,
             basicCollisionStrategy,
@@ -70,30 +113,20 @@ public class BrickerGameManager extends GameManager {
             basicCollisionStrategy,
             basicCollisionStrategy,
             // add new balls collision strategy
-            new BasicCollisionStrategy(removeGameObjectCommand) {
+            new BasicCollisionStrategy() {
                 @Override
                 public void onCollision(GameObject thisObject, GameObject otherObject) {
                     super.onCollision(thisObject, otherObject);
-                    Brick brick = (Brick) thisObject;
+                    if (!(thisObject instanceof Brick))
+                    {
+                        logger.logError("ball collision strategy called with non-brick object");
+                        return;
+                    }
                     
                 }
             }
     };
 
-    private int bricksPerRow;
-    private int bricksPerColumn;
-
-    private int bricks;
-    private int lives;
-    protected int balls;
-
-    private ImageReader imageReader;
-    private SoundReader soundReader;
-    private UserInputListener inputListener;
-    private WindowController windowController;
-    private Vector2 dims;
-
-    private lives livesDisplay;
     // #endregion
 
     // #region constructors
@@ -154,6 +187,25 @@ public class BrickerGameManager extends GameManager {
         }
     }
 
+    private void configureServices(
+            ImageReader imageReader, SoundReader soundReader,
+            UserInputListener inputListener, WindowController windowController) {
+        this.imageReader = imageReader;
+        this.soundReader = soundReader;
+        this.inputListener = inputListener;
+        this.windowController = windowController;
+        Services.registerService(ImageReader.class, imageReader);
+        Services.registerService(SoundReader.class, soundReader);
+        Services.registerService(UserInputListener.class, inputListener);
+        Services.registerService(WindowController.class, windowController);
+        Services.registerService(Vector2.class, dims);
+        
+        Services.registerService(AddGameObjectCommand.class, addGameObjectCommand);
+        Services.registerService(RemoveGameObjectCommand.class, removeGameObjectCommand);
+
+        Services.registerService(Random.class, new Random());
+    }
+
     private void initializeBackground() {
         var background = new GameObject(
                 Vector2.ZERO, dims,
@@ -183,29 +235,14 @@ public class BrickerGameManager extends GameManager {
     }
 
     private Ball initializeBall() {
-        var ballImage = imageReader.readImage(BALL_IMAGE_PATH, true);
-        var ballSize = new Vector2(20, 20);
-        var collisionSound = soundReader.readSound(COLLISION_SOUND_PATH);
-        var ball = new Ball(
-                Vector2.ZERO,
-                ballSize, ballImage, collisionSound,
-                new Vector2(rand.nextFloat() - 0.5f, 1), inputListener);
-        ball.setCenter(dims.mult(0.5f));
-
+        var ball = new Ball();
         this.addGameObjects(ball);
         balls++;
         return ball;
     }
 
     private Paddle initializePaddle() {
-        var paddleImage = imageReader.readImage(PADDLE_IMAGE_PATH, true);
-        var paddleSize = new Vector2(100, 15);
-        var paddle = new Paddle(
-                Vector2.ZERO,
-                paddleSize, paddleImage,
-                inputListener, dims);
-        paddle.setCenter(new Vector2(dims.x() / 2, dims.y() - 50));
-
+        var paddle = new Paddle(new Vector2(dims.x() / 2, dims.y() - 50));
         this.addGameObjects(paddle);
         return paddle;
     }
@@ -238,20 +275,20 @@ public class BrickerGameManager extends GameManager {
         }
     }
 
-    private void initializeGameOverBrick() {
+    private void initializeGameOverWall() {
         var brickSize = new Vector2(dims.x(), 20);
-        var brick = new GameObject(
-                new Vector2(0, dims.y()),
+        var brick = new GameObject(new Vector2(0, dims.y()),
                 brickSize, null) {
             @Override
             public void onCollisionEnter(GameObject other, Collision collision) {
-                if (other instanceof Ball) {
-                    Ball ball = (Ball) other;
+                if (other instanceof BallBase) {
+                    BallBase ball = (BallBase) other;
                     gameObjects().removeGameObject(ball);
-                    balls--;
-                    if (balls > 0) {
+                    if (!(ball instanceof Ball))
                         return;
-                    }
+                    balls--;
+                    if (balls > 0)
+                        return;
                     lives--;
                     livesDisplay.LivesChanged();
                     if (lives <= 0) {
@@ -295,13 +332,12 @@ public class BrickerGameManager extends GameManager {
             SoundReader soundReader,
             UserInputListener inputListener,
             WindowController windowController) {
-        this.imageReader = imageReader;
-        this.soundReader = soundReader;
-        this.inputListener = inputListener;
-        this.windowController = windowController;
         super.initializeGame(imageReader, soundReader, inputListener, windowController);
 
+        configureServices(imageReader, soundReader, inputListener, windowController);
+
         dims = windowController.getWindowDimensions();
+
         lives = 3;
 
         initializeBackground();
@@ -314,7 +350,7 @@ public class BrickerGameManager extends GameManager {
 
         initializeBricks();
 
-        initializeGameOverBrick();
+        initializeGameOverWall();
 
         initializeLivesDisplay();
     }

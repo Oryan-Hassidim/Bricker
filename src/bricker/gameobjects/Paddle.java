@@ -1,33 +1,31 @@
 package bricker.gameobjects;
 
 import java.awt.event.KeyEvent;
+
+import bricker.utils.Services;
 import danogl.GameObject;
+import danogl.gui.ImageReader;
 import danogl.gui.UserInputListener;
-import danogl.gui.rendering.Renderable;
 import danogl.util.Vector2;
 
 public class Paddle extends GameObject {
     // #region Constants
+    private static final String PADDLE_IMAGE_PATH = "assets/paddle.png";
+    private static final Vector2 PADDEL_SIZE = new Vector2(100, 15);
     private static final float MOVEMENT_SPEED = 400;
     // #endregion
 
-    // #region fields
-    private UserInputListener inputListener;
-    private Vector2 windowSize;
-    // #endregion
-
-
-    public Paddle(Vector2 topLeftCorner, Vector2 dimensions,
-            Renderable renderable,
-            UserInputListener inputListener, Vector2 windowSize) {
-        super(topLeftCorner, dimensions, renderable);
-        this.inputListener = inputListener;
-        this.windowSize = windowSize;
+    public Paddle(Vector2 center) {
+        super(Vector2.ZERO, PADDEL_SIZE,
+                Services.getService(ImageReader.class).readImage(PADDLE_IMAGE_PATH, true));
+        setCenter(center);
     }
 
     @Override
     public void update(float arg0) {
         super.update(arg0);
+        var inputListener = Services.getService(UserInputListener.class);
+        var windowSize = Services.getService(Vector2.class);
 
         if (inputListener.isKeyPressed(KeyEvent.VK_RIGHT)) {
             setVelocity(Vector2.RIGHT.mult(MOVEMENT_SPEED));
