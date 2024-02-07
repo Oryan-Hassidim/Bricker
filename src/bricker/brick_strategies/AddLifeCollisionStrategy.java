@@ -16,6 +16,12 @@ import danogl.GameObject;
 public class AddLifeCollisionStrategy extends BasicCollisionStrategy {
 
     /**
+     * Constructs a new AddLifeCollisionStrategy.
+     */
+    public AddLifeCollisionStrategy() {
+        super();
+    }
+    /**
      * Adds a life to the screen when a brick is hit.
      * 
      * @param thisObject the brick that was hit

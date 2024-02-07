@@ -16,6 +16,13 @@ public class ExtraPaddleStrategy extends BasicCollisionStrategy {
     private ExtraPaddle extraPaddle = new ExtraPaddle();
 
     /**
+     * Constructs a new ExtraPaddleStrategy.
+     */
+    public ExtraPaddleStrategy() {
+        super();
+    }
+
+    /**
      * An action to perform when a collision occurs. 
      * 
      * @param thisObject the object that has this strategy

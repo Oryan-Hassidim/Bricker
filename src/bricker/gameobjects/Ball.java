@@ -24,6 +24,6 @@ public class Ball extends BallBase {
                 BallBase.DEFAULT_SIZE,
                 Services.getService(ImageReader.class).readImage(BALL_IMAGE_PATH, true));
         var rand = Services.getService(java.util.Random.class);
-        this.setVelocity(new Vector2(rand.nextFloat() - 0.5f, 1).normalized().mult(MOVEMENT_SPEED));
+        this.setVelocity(new Vector2(rand.nextFloat() - 0.5f, 1).normalized().mult(DEFAULT_MOVEMENT_SPEED));
     }
 }

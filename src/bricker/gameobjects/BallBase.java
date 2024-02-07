@@ -23,7 +23,9 @@ import danogl.util.Vector2;
 public abstract class BallBase extends GameObject {
 
     // #region Constants
-    protected static final float MOVEMENT_SPEED = 200;
+    /** The defualt movement speed of the ball. */
+    protected static final float DEFAULT_MOVEMENT_SPEED = 200;
+    /** The default size of the ball. */
     protected static final Vector2 DEFAULT_SIZE = new Vector2(20, 20);
     /** The path to the collision sound.  
      * downloaded from https://soundbible.com/2067-Blop.html */
@@ -97,9 +99,9 @@ public abstract class BallBase extends GameObject {
         super.update(delta);
         var inputListener = Services.getService(UserInputListener.class);
         if (inputListener.isKeyPressed(KeyEvent.VK_SPACE)) {
-            this.setVelocity(getVelocity().normalized().mult(3 * MOVEMENT_SPEED));
+            this.setVelocity(getVelocity().normalized().mult(3 * DEFAULT_MOVEMENT_SPEED));
         } else {
-            this.setVelocity(getVelocity().normalized().mult(MOVEMENT_SPEED));
+            this.setVelocity(getVelocity().normalized().mult(DEFAULT_MOVEMENT_SPEED));
         }
     }
     // #endregion

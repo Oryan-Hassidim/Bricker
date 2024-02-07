@@ -49,4 +49,3 @@ oryan.hassidim
         not affect the game API, because the update method is public by the father class API.
 
 Thanks for the review!
-    

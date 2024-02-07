@@ -14,8 +14,15 @@ import danogl.GameObject;
  * @author Oryan Hassidim
  */
 public class AddPucksStrategy extends BasicCollisionStrategy {
+    /** The number of pucks to add. */
     private static final int ADD_PUCKS_NUMBER = 2;
 
+    /**
+     * Constructs a new AddPucksStrategy.
+     */
+    public AddPucksStrategy() {
+        super();
+    }
     /**
      * Adds 2 pucks to the screen when a brick is hit.
      * 
