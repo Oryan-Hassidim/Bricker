@@ -1,3 +1,4 @@
+package bricker.main;
 
 import bricker.brick_strategies.CollisionStrategyGenerator;
 import bricker.brick_strategies.Level2CollisionStrategyGenerator;
