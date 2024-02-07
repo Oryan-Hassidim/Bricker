@@ -32,7 +32,7 @@ public class BrickerGameManager extends GameManager {
     private static final Vector2 DEFAULT_WINDOW_SIZE = new Vector2(700, 500);
 
     /** The width of the walls. */
-    public static final int WALL_WIDTH = 50;
+    private static final int WALL_WIDTH = 50;
     /** The default number of bricks per row. */
     private static final int DEFAULT_BRICKS_PER_ROW = 8;
     /** The default number of bricks per column. */
@@ -64,10 +64,11 @@ public class BrickerGameManager extends GameManager {
     /** The number of lives remaining. */
     private int lives;
     /** The number of balls remaining. */
-    protected int balls;
+    private int balls;
 
     /** Whether the game is poused. */
     protected boolean poused;
+
     /** The time of the last pouse/unpouse. */
     private Date lastPoused = new Date();
 
@@ -104,7 +105,8 @@ public class BrickerGameManager extends GameManager {
         public void remove(GameObject gameObject, int layer) {
             var removed = gameObjects().removeGameObject(gameObject, layer);
             if (!removed) {
-                Services.getService(Logger.class).logError("failed to remove game object %s via command", gameObject);
+                Services.getService(Logger.class).logError(
+                        "failed to remove game object %s via command", gameObject);
                 return;
             }
             Services.getService(Logger.class).logInformation(
@@ -151,6 +153,27 @@ public class BrickerGameManager extends GameManager {
 
     // #region methods
 
+    // #region getters and setters
+
+    /**
+     * Gets the poused status of the game.
+     * @return the poused status of the game. true if the game is poused,
+     * false if it is not.
+     */
+    public boolean isPoused() {
+        return poused;
+    }
+
+    /**
+     * Sets the poused status of the game.
+     * @param poused the poused status to set
+     */
+    public void setPoused(boolean poused) {
+        this.poused = poused;
+    }
+
+    // #endregion
+
     /**
      * Sets the camera of the game.
      * we need this method to set the camera from the setCameraCommand.
@@ -186,7 +209,7 @@ public class BrickerGameManager extends GameManager {
      * 
      * @param objects the game objects to add
      */
-    protected void addGameObjects(GameObject... objects) {
+    private void addGameObjects(GameObject... objects) {
         for (var obj : objects) {
             this.gameObjects().addGameObject(obj, Layer.DEFAULT);
         }
@@ -260,7 +283,7 @@ public class BrickerGameManager extends GameManager {
      */
     protected void initializeBalls() {
         for (int i = 0; i < DEFAULT_BALLS_NUMBER; i++) {
-            var ball = new MainBall();
+            var ball = new Ball();
             this.addGameObjects(ball);
             balls++;
         }
@@ -312,7 +335,7 @@ public class BrickerGameManager extends GameManager {
                     gameObjects().removeGameObject(ball);
                     Services.getService(Logger.class).logInformation(
                             "%s removed via game over wall", ball.getClass().getSimpleName());
-                    if (!(ball instanceof MainBall))
+                    if (!(ball instanceof Ball))
                         return;
                     balls--;
                     if (balls > 0)

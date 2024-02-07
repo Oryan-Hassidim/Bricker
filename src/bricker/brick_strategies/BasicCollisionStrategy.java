@@ -12,7 +12,14 @@ import danogl.GameObject;
  * @author Orayn Hassidim
  */
 public class BasicCollisionStrategy implements CollisionStrategy {
-    
+
+    /**
+     * Constructs a new BasicCollisionStrategy.
+     */
+    public BasicCollisionStrategy() {
+        super();
+    }
+
     /**
      * Removes the object from the screen when a collision is detected.
      * 

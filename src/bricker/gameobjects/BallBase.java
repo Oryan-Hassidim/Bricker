@@ -17,7 +17,7 @@ import danogl.util.Vector2;
  * 
  * @see GameObject
  * @see BallBase
- * @see MainBall
+ * @see Ball
  * @author Orayn Hassidim
  */
 public abstract class BallBase extends GameObject {

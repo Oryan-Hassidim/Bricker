@@ -99,7 +99,9 @@ public class Lives extends GameObject {
         hearts = new GameObject[l];
         for (int i = 0; i < l; i++) {
             var heart = new GameObject(
-                    new Vector2(getTopLeftCorner().x() + textWidth + i * (HEIGHT + GAP), getTopLeftCorner().y()),
+                    new Vector2(
+                            getTopLeftCorner().x() + textWidth + i * (HEIGHT + GAP),
+                            getTopLeftCorner().y()),
                     new Vector2(HEIGHT, HEIGHT),
                     heartImage);
             heart.setCoordinateSpace(getCoordinateSpace());

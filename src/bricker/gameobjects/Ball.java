@@ -10,7 +10,7 @@ import bricker.utils.Services;
  * @see BallBase
  * @author Orayn Hassidim
  */
-public class MainBall extends BallBase {
+public class Ball extends BallBase {
 
     /** The path to the ball image. */
     private static final String BALL_IMAGE_PATH = "assets/ball.png";
@@ -18,7 +18,7 @@ public class MainBall extends BallBase {
     /**
      * Constructs a new MainBall.
      */
-    public MainBall() {
+    public Ball() {
         super(
                 Services.getService(Vector2.class).mult(0.5f),
                 BallBase.DEFAULT_SIZE,

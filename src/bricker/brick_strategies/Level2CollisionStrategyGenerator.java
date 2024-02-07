@@ -16,7 +16,7 @@ import java.util.Random;
  * @see DualBehaviorCollisionStrategy
  * @author Orayn Hassidim
  */
-public class Level2CollisionStrategyGenerator implements CollisionStrategyGenerator {
+public final class Level2CollisionStrategyGenerator implements CollisionStrategyGenerator {
 
     /** The maximum amount of actual behaviors to combine. */
     private static final int MAX_ACTUAL_BEHAVIORS_AMOUNT = 3;
