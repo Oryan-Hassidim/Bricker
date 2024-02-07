@@ -18,13 +18,6 @@ import danogl.util.Vector2;
  */
 public class CameraChangeStrategy extends BasicCollisionStrategy {
 
-    /**
-     * Constructs a new CameraChangeStrategy.
-     */
-    public CameraChangeStrategy() {
-        super();
-    }
-
     /*
      * A camera that follows the ball until the ball has collided with a brick 4
      * times.
@@ -69,6 +62,12 @@ public class CameraChangeStrategy extends BasicCollisionStrategy {
         }
     }
 
+    /**
+     * Constructs a new CameraChangeStrategy.
+     */
+    public CameraChangeStrategy() {
+        super();
+    }
 
     /** Whether the camera has been set. */
     private boolean cameraSet = false;

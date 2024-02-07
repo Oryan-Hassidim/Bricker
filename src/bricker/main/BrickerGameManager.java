@@ -16,7 +16,6 @@ import danogl.gui.WindowController;
 import danogl.gui.rendering.Camera;
 import danogl.gui.rendering.Renderable;
 import danogl.util.Vector2;
-
 import java.util.Date;
 import java.util.Random;
 import java.awt.event.KeyEvent;
@@ -28,10 +27,11 @@ import java.awt.event.KeyEvent;
  */
 public class BrickerGameManager extends GameManager {
 
+    
     // #region Constants
     /** The default size of the window. */
     private static final Vector2 DEFAULT_WINDOW_SIZE = new Vector2(700, 500);
-
+    
     /** The width of the walls. */
     private static final int WALL_WIDTH = 50;
     /** The default number of bricks per row. */
@@ -42,7 +42,8 @@ public class BrickerGameManager extends GameManager {
     private static final int BRICKS_AREA_MARGIN = 10;
     /** The gap between bricks. */
     private static final int BRICKS_GAP = 5;
-    // TODO: I need to make all bricks 15 px height?
+    /** The maximum height of the bricks. */
+    private static final int MAX_BRICKHEIGHT = 15;
     /** The max ratio of the height of the bricks area to the window height. */
     private static final float MAX_BRICKS_AREA_HEIGHT_RATIO = 0.4f;
     /** The message to display when the player loses. */
@@ -158,8 +159,9 @@ public class BrickerGameManager extends GameManager {
 
     /**
      * Gets the poused status of the game.
+     * 
      * @return the poused status of the game. true if the game is poused,
-     * false if it is not.
+     *         false if it is not.
      */
     public boolean isPoused() {
         return poused;
@@ -167,6 +169,7 @@ public class BrickerGameManager extends GameManager {
 
     /**
      * Sets the poused status of the game.
+     * 
      * @param poused the poused status to set
      */
     public void setPoused(boolean poused) {
@@ -229,9 +232,6 @@ public class BrickerGameManager extends GameManager {
         Services.registerService(SoundReader.class, soundReader);
         Services.registerService(UserInputListener.class, inputListener);
         Services.registerService(WindowController.class, windowController);
-        this.imageReader = imageReader;
-        this.inputListener = inputListener;
-        this.windowController = windowController;
 
         Services.registerService(CollisionStrategyGenerator.class,
                 new Level2CollisionStrategyGenerator());
@@ -310,7 +310,7 @@ public class BrickerGameManager extends GameManager {
         var bricksPerColumn = Services.getService(BricksNumber.class).getRows();
         var brickSize = new Vector2(
                 (dims.x() - 2 * BRICKS_AREA_MARGIN - (bricksPerRow - 1) * BRICKS_GAP) / bricksPerRow,
-                Math.min(15, (bricksAreaHeight - (bricksPerColumn - 1) * BRICKS_GAP) / bricksPerColumn));
+                Math.min(MAX_BRICKHEIGHT, (bricksAreaHeight - (bricksPerColumn - 1) * BRICKS_GAP) / bricksPerColumn));
         bricks = bricksPerRow * bricksPerColumn;
         for (int i = 0; i < bricksPerRow; i++) {
             for (int j = 0; j < bricksPerColumn; j++) {
@@ -383,6 +383,9 @@ public class BrickerGameManager extends GameManager {
         super.initializeGame(imageReader, soundReader, inputListener, windowController);
 
         configureServices(imageReader, soundReader, inputListener, windowController);
+        this.imageReader = Services.getService(ImageReader.class);
+        this.inputListener = Services.getService(UserInputListener.class);
+        this.windowController = Services.getService(WindowController.class);
 
         dims = windowController.getWindowDimensions();
 
