@@ -1,0 +1,51 @@
+oryan.hassidim
+319131579
+
+1.  I'm using DI with a service of RemoveGameObjectCommand which is called when a collision occured.
+    The advantages of using DI is that I can easily change the implementation of the command without
+    changing the code that uses it, and I don't need share my BrickerGameManager itself.
+    Also, I can easily test the behavior with injecting a mock of the command.
+    The disadvantage is that I need to create a new type of RemoveGameObjectCommand, and I can't use
+    a generic Command type.
+2.  I created a new type - Lives, that gets a location and getter of int and creates a GameObject for
+    the text and a GameObject to each heart.
+    There are a LiveChanged method that updates the view of the lives.
+    The Lives class is the only new class that I created for this.
+3.  For simplicity and the readability of the code, I created new type for each collision strategy 
+    (and for each special new GameObject) and I didn't used the object costumization on the fly.
+    Thanks to the DI system, I didn't need to share references and send parameters to the strategies.
+    a.  For AddPucksCollisionStrategy - it creates on collision 2 pucks (of type Puck with the proprties
+        it's need) and adds to the ga,e via the AddGameObjectCommand from services.
+    b.  For ExtraPaddleCollisionStrategy - it creates on collision a new paddle (of type ExtraPaddle
+        with the needed behavior) and adds to the game via the AddGameObjectCommand from services.
+    c.  For CameraChangeCollisionStrategy - it creates on collision a new camera (of nested type 
+        CameraChangeCollisionStrategy.BallCamera, that cheks the collisions of the ball and exiting
+        after 4 collisions) and adds to the game via the AddGameObjectCommand from services.
+    d.  For AddLifeCollisionStrategy - it creates on collision a new life (of type Life) and adds to
+        the game via the AddGameObjectCommand from services.
+4.  I created a new type - DualBehaviorCollisionStrategy, that gets a list of CollisionStrategy and
+    chooses 2 random strategies from the list, saves in a field and call them on collision.
+    I using the decorator pattern to add the behavior of the 2 strategies.
+    For limiting the number of strategies, the DualBehaviorCollisionStrategy gets in the constructor
+    the max number of strategies that it can choose, and the DualBehaviorCollisionStrategy calculates
+    the inner strategy max number of behaviors and sends it to him.
+    This class is versatile and can be used for any number of strategies via constants and max
+    startegies via the ctor parameter.
+5.  I did some changes in the API for doing the game more versatile and open to extensions,
+    configurations and tests:
+    a.  I added some protected methods to the BrickerGameManager for the ability to override them
+        and costumize the behavior of the game:
+        - protected MAX_LIVES constant - for using by derived classes.
+        - public isPoused and setPoused methods - for using by derived classes and from main.
+        - protected winGame, loseGame methods - for adding behaviors and call them from derived classes.
+        - protected initialize***** methods - for adding behaviors and call them from derived classes, because
+          the initializeGame is public by the father class API.
+        - the most important - protected configureServices method - that is called from the initializeGame and
+          can be overriden by derived classes for changing services of the DI system, testing and so on.
+    b.  Now there is BallBase abstract class and Bell class extends it and don't the GameObject himself.
+    c.  Alse, there is a PaddeBase abstract class and Paddle class extends it and don't the GameObject
+        himself.
+    d.  I overrided the update method of the ball for make it faster by pressing the space key - but it does
+        not affect the game API, because the update method is public by the father class API.
+
+Thanks for the review!

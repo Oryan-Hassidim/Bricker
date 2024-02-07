@@ -10,7 +10,9 @@ import java.util.Date;
  */
 public interface Logger {
 
+    /** the format of the time in the log. */
     public static final String TIME_FORMAT = "HH:mm:ss";
+    /** the formatter of the time in the log. */
     public static final SimpleDateFormat TIME_FORMATTER = new SimpleDateFormat(TIME_FORMAT);
 
     /**
@@ -37,7 +39,8 @@ public interface Logger {
      * @param args    the arguments to format the message with
      */
     public default void logError(String message, Object... args) {
-        this.logFormatted("[ERROR %s] %s", TIME_FORMATTER.format(new Date()), String.format(message, args));
+        this.logFormatted("[ERROR %s] %s",
+                TIME_FORMATTER.format(new Date()), String.format(message, args));
     }
 
     /**
@@ -47,7 +50,8 @@ public interface Logger {
      * @param args    the arguments to format the message with
      */
     public default void logInformation(String message, Object... args) {
-        this.logFormatted("[INFO %s] %s", TIME_FORMATTER.format(new Date()), String.format(message, args));
+        this.logFormatted("[INFO %s] %s",
+                TIME_FORMATTER.format(new Date()), String.format(message, args));
     }
 
     /**
@@ -57,7 +61,7 @@ public interface Logger {
      * @param args    the arguments to format the message with
      */
     public default void logWarning(String message, Object... args) {
-        this.logFormatted("[WARNING %s] %s", TIME_FORMATTER.format(new Date()), String.format(message, args));
+        this.logFormatted("[WARNING %s] %s",
+                TIME_FORMATTER.format(new Date()), String.format(message, args));
     }
-
 }

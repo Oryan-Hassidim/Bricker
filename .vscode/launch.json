@@ -14,12 +14,9 @@
             "type": "java",
             "name": "App",
             "request": "launch",
-            "mainClass": "BrickerGameManager",
+            "mainClass": "bricker.main.BrickerGameManager",
             "projectName": "Bricker_36c4a4b5",
-            "args": [
-                "4",
-                "4"
-            ]
+            "args": [20,10]
         }
     ]
 }

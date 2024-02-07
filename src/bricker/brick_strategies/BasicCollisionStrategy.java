@@ -1,28 +1,34 @@
 package bricker.brick_strategies;
 
-import bricker.utils.ParametrizedCommand;
+import bricker.utils.RemoveGameObjectCommand;
+import bricker.utils.Services;
 import danogl.GameObject;
 
 /**
- * a basic collision strategy that prints a message to the console
- * when a collision is detected
- * @author Orayn Hassidim
+ * A basic collision strategy that removes the object from the
+ * screen when a collision is detected.
+ * 
  * @see CollisionStrategy
+ * @author Orayn Hassidim
  */
 public class BasicCollisionStrategy implements CollisionStrategy {
-    private ParametrizedCommand<GameObject> remove;
 
-    public BasicCollisionStrategy(ParametrizedCommand<GameObject> removeable) {
-        this.remove = removeable;
-    }
     /**
-     * prints a message to the console when a collision is detected
-     * @param thisObject the object that this strategy is attached to
+     * Constructs a new BasicCollisionStrategy.
+     */
+    public BasicCollisionStrategy() {
+        super();
+    }
+
+    /**
+     * Removes the object from the screen when a collision is detected.
+     * 
+     * @param thisObject  the object that this strategy is attached to
      * @param otherObject the object that this object collided with
      */
     @Override
     public void onCollision(GameObject thisObject, GameObject otherObject) {
-        remove.invoke(thisObject);
+        Services.getService(RemoveGameObjectCommand.class).remove(thisObject);
     }
 
 }

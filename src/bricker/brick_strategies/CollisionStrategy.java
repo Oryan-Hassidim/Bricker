@@ -3,12 +3,15 @@ package bricker.brick_strategies;
 import danogl.GameObject;
 
 /**
- * an interface for collision strategies
+ * An interface for collision strategies
+ * 
+ * @see BasicCollisionStrategy
  * @author Orayn Hassidim
  */
 public interface CollisionStrategy {
     /**
-     * the action to be taken when a collision is detected
+     * An action to be performed when a collision is detected.
+     * 
      * @param thisObject the object that has the strategy
      * @param otherObject the object that collided with the object that has the strategy
      */

@@ -1,5 +1,16 @@
 package bricker.utils;
 
-public interface getter<T> {
+/**
+ * A getter of a value.
+ * 
+ * @param <T> the type of the value
+ * @author Orayn Hassidim
+ */
+public interface Getter<T> {
+    /**
+     * Gets the value.
+     * 
+     * @return the value
+     */
     T get();
 }
