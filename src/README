@@ -36,7 +36,7 @@ oryan.hassidim
     a.  I added some protected methods to the BrickerGameManager for the ability to override them
         and costumize the behavior of the game:
         - protected MAX_LIVES constant - for using by derived classes.
-        - public isPoused and setPoused methods - for using by derived classes and from main.
+        - public isPoused, setPoused and togglePoused methods - for using by derived classes and from main.
         - protected winGame, loseGame methods - for adding behaviors and call them from derived classes.
         - protected initialize***** methods - for adding behaviors and call them from derived classes, because
           the initializeGame is public by the father class API.

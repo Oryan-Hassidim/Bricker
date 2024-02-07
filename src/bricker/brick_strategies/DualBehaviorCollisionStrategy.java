@@ -1,6 +1,8 @@
 package bricker.brick_strategies;
 
 import java.util.Random;
+
+import bricker.utils.Logger;
 import bricker.utils.Services;
 import danogl.GameObject;
 
@@ -64,5 +66,6 @@ public class DualBehaviorCollisionStrategy extends BasicCollisionStrategy {
         for (var strategy : strategies) {
             strategy.onCollision(thisObject, otherObject);
         }
+        Services.getService(Logger.class).logInformation("dual behavior collision strategy performed");
     }
 }

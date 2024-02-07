@@ -1,5 +1,6 @@
 package bricker.brick_strategies;
 
+import bricker.utils.Logger;
 import bricker.utils.Services;
 import java.util.Random;
 
@@ -64,11 +65,16 @@ public final class Level2CollisionStrategyGenerator implements CollisionStrategy
     public CollisionStrategy generateStrategy() {
         var rand = Services.getService(Random.class);
         var index = rand.nextInt(strategies.length);
+        CollisionStrategy strategy;
         if (index == strategies.length - 1) {
-            return new DualBehaviorCollisionStrategy(
+            strategy = new DualBehaviorCollisionStrategy(
                     MAX_ACTUAL_BEHAVIORS_AMOUNT,
                     addPucksStrategy, extraPaddleStrategy, cameraChangeStrategy, addLifeStrategy);
+        } else {
+            strategy = strategies[index];
         }
-        return strategies[index];
+        Services.getService(Logger.class).logInformation(
+                "Generated strategy: %s", strategy.getClass().getSimpleName());
+        return strategy;
     }
 }

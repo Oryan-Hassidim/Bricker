@@ -1,5 +1,6 @@
 package bricker.brick_strategies;
 
+import bricker.utils.Logger;
 import bricker.utils.RemoveGameObjectCommand;
 import bricker.utils.Services;
 import danogl.GameObject;
@@ -29,6 +30,8 @@ public class BasicCollisionStrategy implements CollisionStrategy {
     @Override
     public void onCollision(GameObject thisObject, GameObject otherObject) {
         Services.getService(RemoveGameObjectCommand.class).remove(thisObject);
+        Services.getService(Logger.class).logInformation("%s removed",
+                thisObject.getClass().getSimpleName());
     }
 
 }

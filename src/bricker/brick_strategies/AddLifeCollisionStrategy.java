@@ -2,6 +2,7 @@ package bricker.brick_strategies;
 
 import bricker.gameobjects.Life;
 import bricker.utils.AddGameObjectCommand;
+import bricker.utils.Logger;
 import bricker.utils.Services;
 import danogl.GameObject;
 
@@ -32,6 +33,7 @@ public class AddLifeCollisionStrategy extends BasicCollisionStrategy {
         super.onCollision(thisObject, otherObject);
         var life = new Life(thisObject.getCenter());
         Services.getService(AddGameObjectCommand.class).add(life);
+        Services.getService(Logger.class).logInformation("Life added");
     }
 
 }

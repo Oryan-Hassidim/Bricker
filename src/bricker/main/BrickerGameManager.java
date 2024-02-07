@@ -27,11 +27,10 @@ import java.awt.event.KeyEvent;
  */
 public class BrickerGameManager extends GameManager {
 
-    
     // #region Constants
     /** The default size of the window. */
     private static final Vector2 DEFAULT_WINDOW_SIZE = new Vector2(700, 500);
-    
+
     /** The width of the walls. */
     private static final int WALL_WIDTH = 50;
     /** The default number of bricks per row. */
@@ -153,8 +152,6 @@ public class BrickerGameManager extends GameManager {
     }
     // #endregion
 
-    // #region methods
-
     // #region getters and setters
 
     /**
@@ -174,9 +171,21 @@ public class BrickerGameManager extends GameManager {
      */
     public void setPoused(boolean poused) {
         this.poused = poused;
+        Services.getService(Logger.class).logInformation(
+                "game %s", poused ? "poused" : "unpoused");
+    }
+
+    /**
+     * Toggles the poused status of the game.
+     */
+    public void togglePoused() {
+        setPoused(!poused);
+        lastPoused = new Date();
     }
 
     // #endregion
+
+    // #region methods
 
     /**
      * Sets the camera of the game.
@@ -192,9 +201,13 @@ public class BrickerGameManager extends GameManager {
      * A method to call when the player wins the game.
      */
     protected void winGame() {
+        var logger = Services.getService(Logger.class);
+        logger.logInformation("win game");
         if (!windowController.openYesNoDialog(WIN_MESSAGE)) {
+            logger.logInformation("exit");
             windowController.closeWindow();
         }
+        logger.logInformation("reset game");
         windowController.resetGame();
     }
 
@@ -202,9 +215,13 @@ public class BrickerGameManager extends GameManager {
      * A method to call when the player loses the game.
      */
     protected void loseGame() {
+        var logger = Services.getService(Logger.class);
+        logger.logInformation("lose game");
         if (!windowController.openYesNoDialog(LOSE_MESSAGE)) {
+            logger.logInformation("exit");
             windowController.closeWindow();
         }
+        logger.logInformation("reset game");
         windowController.resetGame();
     }
 
@@ -310,7 +327,9 @@ public class BrickerGameManager extends GameManager {
         var bricksPerColumn = Services.getService(BricksNumber.class).getRows();
         var brickSize = new Vector2(
                 (dims.x() - 2 * BRICKS_AREA_MARGIN - (bricksPerRow - 1) * BRICKS_GAP) / bricksPerRow,
-                Math.min(MAX_BRICKHEIGHT, (bricksAreaHeight - (bricksPerColumn - 1) * BRICKS_GAP) / bricksPerColumn));
+                Math.min(
+                        MAX_BRICKHEIGHT,
+                        (bricksAreaHeight - (bricksPerColumn - 1) * BRICKS_GAP) / bricksPerColumn));
         bricks = bricksPerRow * bricksPerColumn;
         for (int i = 0; i < bricksPerRow; i++) {
             for (int j = 0; j < bricksPerColumn; j++) {
@@ -339,16 +358,18 @@ public class BrickerGameManager extends GameManager {
                     if (!(ball instanceof Ball))
                         return;
                     balls--;
+                    if (camera() != null && camera().getObjectFollowed() == ball) {
+                        setCamera(null);
+                        Services.getService(Logger.class).logInformation("camera reset");
+                    }
                     if (balls > 0)
                         return;
                     lives--;
-                    if (camera() != null && camera().getObjectFollowed() == ball)
-                        setCamera(null);
-
                     livesDisplay.LivesChanged();
                     if (lives <= 0) {
                         loseGame();
                     }
+
                     initializeBalls();
                 }
             }
@@ -428,8 +449,7 @@ public class BrickerGameManager extends GameManager {
             winGame();
         } else if (inputListener.isKeyPressed(KeyEvent.VK_P)
                 && new Date().getTime() - lastPoused.getTime() > 200) {
-            poused = !poused;
-            lastPoused = new Date();
+            togglePoused();
         }
     }
     // #endregion
@@ -452,13 +472,7 @@ public class BrickerGameManager extends GameManager {
                             DEFAULT_BRICKS_PER_ROW,
                             DEFAULT_BRICKS_PER_COLUMN));
         }
-        BrickerGameManager gm = new BrickerGameManager() {
-            @Override
-            protected void configureServices(
-                    ImageReader ir, SoundReader sr, UserInputListener il, WindowController wc) {
-                super.configureServices(ir, sr, il, wc);
-            }
-        };
+        BrickerGameManager gm = new BrickerGameManager();
         gm.run();
     }
 }

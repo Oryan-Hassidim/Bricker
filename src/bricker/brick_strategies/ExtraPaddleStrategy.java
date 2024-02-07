@@ -1,6 +1,8 @@
 package bricker.brick_strategies;
 
 import bricker.gameobjects.ExtraPaddle;
+import bricker.utils.Logger;
+import bricker.utils.Services;
 import danogl.GameObject;
 
 /**
@@ -32,5 +34,6 @@ public class ExtraPaddleStrategy extends BasicCollisionStrategy {
     public void onCollision(GameObject thisObject, GameObject otherObject) {
         super.onCollision(thisObject, otherObject);
         extraPaddle.initialize();
+        Services.getService(Logger.class).logInformation("Extra paddle added");
     }
 }

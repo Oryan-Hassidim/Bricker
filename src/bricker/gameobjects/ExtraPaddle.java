@@ -26,7 +26,7 @@ public class ExtraPaddle extends PaddleBase {
      * Constructs a new ExtraPaddle.
      */
     public ExtraPaddle() {
-        super(Services.getService(Vector2.class).mult(0.5f));
+        super(Vector2.ZERO);
     }
 
     /**
@@ -54,6 +54,7 @@ public class ExtraPaddle extends PaddleBase {
             return;
         }
         collisions = COLLISIONS_BEFORE_DISAPEERING;
+        setCenter(Services.getService(Vector2.class).mult(0.5f));
         Services.getService(Logger.class).logInformation("extra paddle initialized");
         Services.getService(AddGameObjectCommand.class).add(this);
     }

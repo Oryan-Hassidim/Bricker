@@ -2,6 +2,7 @@ package bricker.brick_strategies;
 
 import bricker.gameobjects.Puck;
 import bricker.utils.AddGameObjectCommand;
+import bricker.utils.Logger;
 import bricker.utils.Services;
 import danogl.GameObject;
 
@@ -36,5 +37,6 @@ public class AddPucksStrategy extends BasicCollisionStrategy {
             var puck = new Puck(thisObject.getCenter());
             Services.getService(AddGameObjectCommand.class).add(puck);
         }
+        Services.getService(Logger.class).logInformation("Pucks added");
     }
 }

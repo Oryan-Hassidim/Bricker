@@ -1,6 +1,7 @@
 package bricker.brick_strategies;
 
 import bricker.gameobjects.Ball;
+import bricker.utils.Logger;
 import bricker.utils.Services;
 import bricker.utils.SetCameraCommand;
 import danogl.GameObject;
@@ -55,10 +56,11 @@ public class CameraChangeStrategy extends BasicCollisionStrategy {
         @Override
         public void update(float delta) {
             super.update(delta);
-            if (ball == this.getObjectFollowed() && ball.getCollisionCounter() <= count)
+            if (ball == this.getObjectFollowed() && ball.getCollisionCounter() < count)
                 return;
             Services.getService(SetCameraCommand.class).setCamera(null);
             cameraSet = false;
+            Services.getService(Logger.class).logInformation("Camera reset");
         }
     }
 
@@ -90,5 +92,6 @@ public class CameraChangeStrategy extends BasicCollisionStrategy {
         Camera camera = new BallCamera(ball);
         Services.getService(SetCameraCommand.class).setCamera(camera);
         cameraSet = true;
+        Services.getService(Logger.class).logInformation("Camera set to follow ball");
     }
 }
